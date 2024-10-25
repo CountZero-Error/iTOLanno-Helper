@@ -4,12 +4,13 @@ import argparse
 import random
 
 class BranchSymbols(generalFunc):
-    def __init__(self, fi, fo, sep, ID, label, symbol=None, symbol_size=10, symbol_color=None, fill_color=1, symbol_position=1):
+    def __init__(self, fi, fo, sep, ID, label, dataset_label='example symbols', symbol=None, symbol_size=3, symbol_color=None, fill_color=1, symbol_position=1):
         super().__init__(fi, fo, sep)
 
         self.ID = ID
         self.label = label
-        self.annotation_prefix = open("../templates/dataset_color_strip_template.txt").read()
+        self.dataset_label = dataset_label
+        self.annotation_prefix = open("../templates/dataset_symbols_template.txt").read().replace('example symbols', dataset_label)
 
         self.symbol = symbol # input should be a txt file contain relationship between label and symbol, check relationship_template under current directory
         self.symbol_size = symbol_size
@@ -37,7 +38,7 @@ class BranchSymbols(generalFunc):
 
         # Adding content
         leaf_num = df.shape[0]
-        symbol_info = {'Leaf_ID': df.loc[:, self.id][:],
+        symbol_info = {'leaf_ID': df.loc[:, self.ID][:],
                        'symbol': [],
                        'symbol_size': [self.symbol_size for i in range(leaf_num)],
                        'symbol_color': [],
@@ -68,21 +69,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-I', '--FILE_INPUT', required=True, type=str)
     parser.add_argument('-O', '--FILE_OUTPUT', required=True, type=str, help="File name is required.")
-    parser.add_argument('-SEP', '--SEPARATOR', default=",", help="Default is ',', is need tab, type tab.")
+    parser.add_argument('-SEP', '--SEPARATOR', default=",", help="Default is ',', if is tab, type tab.")
     parser.add_argument('-ID', '--ID', required=True, type=str, help="The column name of ID.")
     parser.add_argument('-L', '--LABEL', required=True, type=str, help="The column name of label.")
+    parser.add_argument('-DSL', '--DATASET_LABEL', default='example symbols', type=str)
     parser.add_argument('-SYMBOL', '--SYMBOL', default=None, type=str, help="Symbol option need to be relationship file, check relationship_template.txt file.")
-    parser.add_argument('-SYMBOL_S', '--SYMBOL_SIZE', default=10, type=int)
-    parser.add_argument('-SYMBOL_C', '--SYMBOL_COLOR', default=None, type=str, help="Symbol option need to be relationship file, check relationship_template.txt file.")
-    parser.add_argument('-FC', '--FILL_COLOR', default=1, choice=[0, 1], type=int, help="1 fill color, 0 don't fill color.")
+    parser.add_argument('-SYMBOL_S', '--SYMBOL_SIZE', default=3, type=int)
+    parser.add_argument('-SYMBOL_C', '--SYMBOL_COLOR', default=None, type=str, help="Symbol option need a relationship file, check relationship_template.txt file.")
+    parser.add_argument('-FC', '--FILL_COLOR', default=1, choices=[0, 1], type=int, help="1 fill color, 0 don't fill color.")
     parser.add_argument('-SYMBOL_P', '--SYMBOL_POSITION', default=1, type=int)
 
     args = parser.parse_args()
     fi = args.FILE_INPUT
-    fo = args.FILE_OUTPUT_PATH
+    fo = args.FILE_OUTPUT
     sep = args.SEPARATOR
     ID = args.ID
     label = args.LABEL
+    dataset_label = args.DATASET_LABEL
     symbol = args.SYMBOL
     symbol_size = args.SYMBOL_SIZE
     symbol_color = args.SYMBOL_COLOR
@@ -93,5 +96,5 @@ if __name__ == "__main__":
     if sep.lower() == 'tab':
         sep = '\t'
 
-    annotate = BranchSymbols(fi, fo, sep, ID, label, symbol=None, symbol_size=10, symbol_color=None, fill_color=1, symbol_position=1)
+    annotate = BranchSymbols(fi, fo, sep, ID, label, dataset_label, symbol, symbol_size, symbol_color, fill_color, symbol_position)
     annotate.generator()

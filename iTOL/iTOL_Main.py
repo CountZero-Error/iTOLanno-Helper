@@ -39,5 +39,5 @@ class generalFunc:
         with open(self.fo, 'w') as out:
             out.write(f'{annotation_prefix}\n')
             for i in range(df.shape[0]):
-                curr_line = ','.join(df.iloc[i, :])
-                out.write(curr_line)
+                curr_line = ','.join(list(map(str, list(df.iloc[i, :]))))
+                out.write(curr_line + '\n')

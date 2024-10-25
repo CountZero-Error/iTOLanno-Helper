@@ -9,14 +9,14 @@ DATASET_COLORSTRIP
 #select the separator which is used to delimit the data below (TAB,SPACE or COMMA).This separator must be used throughout this file.
 
 #SEPARATOR TAB
-#SEPARATOR COMMA
-SEPARATOR SPACE
+SEPARATOR COMMA
+#SEPARATOR SPACE
 
 #label is used in the legend table (can be changed later)
-DATASET_LABEL label1
+DATASET_LABEL,label1
 
 #dataset color (can be changed later)
-COLOR #ff0000
+COLOR,#ff0000
 
 #=================================================================#
 #                    OPTIONAL SETTINGS                            #
@@ -24,7 +24,7 @@ COLOR #ff0000
 
 #If COLOR_BRANCHES is set to 1, branches of the tree will be colored according to the colors of the strips above the leaves.
 #When all children of a node have the same color, it will be colored the same, ie. the color will propagate inwards towards the root.
-COLOR_BRANCHES 0
+COLOR_BRANCHES,0
 
 
 #=================================================================#
@@ -119,7 +119,7 @@ DATA
 
 #Examples:
 #assign a red colored strip to leaf 9606, with label 'Human'
-#9606 #ff0000 Human
+#9606,#ff0000,Human
 
 #assign a green, semi-transparent (alpha 0.5) strip to an internal node, without any label. If 'Show internal values' is set to 'No', this will only be displayed if the node is collapsed. 
 #9606|5664 rgba(0,255,0,0.5)

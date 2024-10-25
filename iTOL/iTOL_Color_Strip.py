@@ -1,94 +1,62 @@
+from iTOL_Main import generalFunc
 import pandas as pd
 import argparse
 import random
-import os
 
-class ColorStrip:
-    def __init__(self, fi, fo, sep):
-        self.fi = fi
-        self.fo = fo
-        self.sep = sep
-        self.annotation_prefix = open("./templates/dataset_color_strip_template.txt").read()
+class ColorStrip(generalFunc):
+    def __init__(self, fi, fo, sep, ID, label, strip_color=None, dataset_label='label1'):
+        super().__init__(fi, fo, sep)
 
-    def generate_random_color_code(self):
-        # Generate three random numbers between 0 and 255
-        R = random.randint(0, 255)
-        G = random.randint(0, 255)
-        B = random.randint(0, 255)
-        
-        # Convert the RGB values to a hexadecimal color code
-        color_code = "#{:02X}{:02X}{:02X}".format(R, G, B)
-        
-        return color_code
-    
-    def write_fo(self, df, colors):
-        # Output file format
-        # Leaf_ID   Leaf_Color  Leaf_Label
-        # 123   #456727 number
-        # hello #C23B57 str
-        raw_df = {"Leaf_ID": df["Leaf_ID"][:],
-                  "Leaf_Color": [],
-                  "Leaf_Label": df["Leaf_Label"][:]}
-
-        for elm in raw_df["Leaf_Label"]:
-            raw_df["Leaf_Color"].append(colors[elm])
-
-        new_df = pd.DataFrame(raw_df)
-        
-        # Color table in csv file
-        print('[*] Generating color_table.csv...')
-        new_df.to_csv(os.path.join(self.fo, "color_table.csv"), sep='\t', index=False)
-
-        # Annotation file
-        print('[*] Generating color_strip.txt...')
-        with open(os.path.join(self.fo, "color_strip.txt"), 'w') as out:
-            out.write(f'{self.annotation_prefix}\n')
-            for i in range(new_df.shape[0]):
-                out.write(f'{new_df["Leaf_ID"][i]} {new_df["Leaf_Color"][i]} {new_df["Leaf_Label"][i]}\n')
+        self.ID = ID
+        self.label = label
+        self.strip_color = strip_color
+        self.annotation_prefix = open("../templates/dataset_color_strip_template.txt").read().replace('label1', dataset_label)
 
     # main
     def generator(self):
-        # Input file format
-        # Leaf_ID   Leaf_Label
-        # 123   number
-        # hello str
         print('[*] Reading data...')
         df = pd.read_csv(self.fi, sep=self.sep)
-        
-        # Labels
-        labels = set()
-        for elm in df["Leaf_Label"]:
-            labels.add(elm)
-        
-        # Add color
-        print('[*] Assigning color...')
-        colors = {}
-        color_used = []
-        for elm in labels:
-            if elm.lower()  == 'fibroblast':
-                colors[elm] = '#f44336'
-            
-            else:
-                while True:
-                    color = self.generate_random_color_code()
 
-                    if color not in color_used:
-                        colors[elm] = color
-                        break
-        
+        # Leaf_ID,strip_color,label
+
+        # Adding content
+        leaf_num = df.shape[0]
+        color_strip_info = {'leaf_ID': df.loc[:, self.ID][:],
+                            'color_strip': [],
+                            'label': df.loc[:, self.label][:]}
+
+        # Strip color
+        if self.strip_color == None:
+            color_strip = {curr_label: self.generate_random_color_code() for curr_label in set(df.loc[:, self.label])}
+        else:
+            color_strip = self.get_relations(self.strip_color)
+        color_strip_info['color_strip'] = [color_strip[df.loc[i, self.label]] for i in range(leaf_num)]
+
         print("[*] Generating output files...")
-        self.write_fo(df, colors)
+        self.write_fo(pd.DataFrame(color_strip_info), self.annotation_prefix)
         print('[*] Done.')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-I', '--FILE_INPUT', required=True, type=str)
-    parser.add_argument('-O', '--FILE_OUTPUT_PATH', required=True, type=str, help="File name is not required.")
-    parser.add_argument('-SEP', '--SEPARATOR', default="\t", help="Default is TAB.")
+    parser.add_argument('-O', '--FILE_OUTPUT_PATH', required=True, type=str, help="File name is required.")
+    parser.add_argument('-SEP', '--SEPARATOR', default=",", help="Default is ',', if is tab, type tab.")
+    parser.add_argument('-ID', '--ID', required=True, type=str)
+    parser.add_argument('-L', '--LABEL', required=True, type=str)
+    parser.add_argument('-DSL', '--DATASET_LABEL', default='label1', type=str)
+    parser.add_argument('-SC', '--STRIP_COLOR', default=None, type=str, help="STRIP_COLOR option need a relationship file, check relationship_template.txt file.")
+
     args = parser.parse_args()
     fi = args.FILE_INPUT
     fo = args.FILE_OUTPUT_PATH
     sep = args.SEPARATOR
+    ID = args.ID
+    label = args.LABEL
+    dataset_label = args.DATASET_LABEL
+    strip_color = args.STRIP_COLOR
 
-    annotate = ColorStrip(fi, fo, sep)
+    if sep.lower() == 'tab':
+        sep = '\t'
+
+    annotate = ColorStrip(fi, fo, sep, ID, label, strip_color, dataset_label)
     annotate.generator()
