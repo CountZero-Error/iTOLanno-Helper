@@ -4,10 +4,10 @@ import argparse
 import random
 
 class BranchSymbols(generalFunc):
-    def __init__(self, fi, fo, sep, id, label, symbol=None, symbol_size=10, symbol_color=None, fill_color=1, symbol_position=1):
+    def __init__(self, fi, fo, sep, ID, label, symbol=None, symbol_size=10, symbol_color=None, fill_color=1, symbol_position=1):
         super().__init__(fi, fo, sep)
 
-        self.id = id
+        self.ID = ID
         self.label = label
         self.annotation_prefix = open("../templates/dataset_color_strip_template.txt").read()
 
@@ -67,12 +67,31 @@ class BranchSymbols(generalFunc):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-I', '--FILE_INPUT', required=True, type=str)
-    parser.add_argument('-O', '--FILE_OUTPUT_PATH', required=True, type=str, help="File name is not required.")
-    parser.add_argument('-SEP', '--SEPARATOR', default="\t", help="Default is TAB.")
+    parser.add_argument('-O', '--FILE_OUTPUT', required=True, type=str, help="File name is required.")
+    parser.add_argument('-SEP', '--SEPARATOR', default=",", help="Default is ',', is need tab, type tab.")
+    parser.add_argument('-ID', '--ID', required=True, type=str, help="The column name of ID.")
+    parser.add_argument('-L', '--LABEL', required=True, type=str, help="The column name of label.")
+    parser.add_argument('-SYMBOL', '--SYMBOL', default=None, type=str, help="Symbol option need to be relationship file, check relationship_template.txt file.")
+    parser.add_argument('-SYMBOL_S', '--SYMBOL_SIZE', default=10, type=int)
+    parser.add_argument('-SYMBOL_C', '--SYMBOL_COLOR', default=None, type=str, help="Symbol option need to be relationship file, check relationship_template.txt file.")
+    parser.add_argument('-FC', '--FILL_COLOR', default=1, choice=[0, 1], type=int, help="1 fill color, 0 don't fill color.")
+    parser.add_argument('-SYMBOL_P', '--SYMBOL_POSITION', default=1, type=int)
+
     args = parser.parse_args()
     fi = args.FILE_INPUT
     fo = args.FILE_OUTPUT_PATH
     sep = args.SEPARATOR
+    ID = args.ID
+    label = args.LABEL
+    symbol = args.SYMBOL
+    symbol_size = args.SYMBOL_SIZE
+    symbol_color = args.SYMBOL_COLOR
+    fill_color = args.FILL_COLOR
+    symbol_position = args.SYMBOL_POSITION
 
-    annotate = BranchSymbols(fi, fo, sep)
+
+    if sep.lower() == 'tab':
+        sep = '\t'
+
+    annotate = BranchSymbols(fi, fo, sep, ID, label, symbol=None, symbol_size=10, symbol_color=None, fill_color=1, symbol_position=1)
     annotate.generator()
