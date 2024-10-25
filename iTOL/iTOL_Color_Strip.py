@@ -8,7 +8,7 @@ class ColorStrip:
         self.fi = fi
         self.fo = fo
         self.sep = sep
-        self.annotation_prefix = read("./templates/dataset_color_strip_template.txt")
+        self.annotation_prefix = open("./templates/dataset_color_strip_template.txt").read()
 
     def generate_random_color_code(self):
         # Generate three random numbers between 0 and 255
